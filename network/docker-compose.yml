@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
     networks:
       backend:
-        ipv4_address: 172.28.241.3
+        ipv4_address: 172.28.241.100
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
