@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  portainer:
+    image: portainer/portainer-ce
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer_data:/data
+    networks:
+      backend:
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer-frontend.rule=Host(`portainer.${ROOT_DOMAIN}`)
+      - traefik.http.routers.portainer-frontend.entrypoints=websecure
+      - traefik.http.services.portainer-frontend.loadbalancer.server.port=9000
+      - traefik.http.routers.portainer-frontend.service=portainer-frontend
+
+networks:
+  backend:
+    external: true

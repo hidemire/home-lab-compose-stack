@@ -1,0 +1,26 @@
+http:
+  routers:
+    omv:
+      rule: 'Host(`omv.{{env "ROOT_DOMAIN"}}`)'
+      service: omv
+      entrypoints:
+        - websecure
+      middlewares:
+        - default-headers
+
+  services:
+    omv:
+      loadBalancer:
+        servers:
+          - url: 'http://{{env "PI_HOST"}}:80'
+        passHostHeader: true
+
+  middlewares:
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true

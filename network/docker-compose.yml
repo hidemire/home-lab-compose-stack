@@ -1,0 +1,94 @@
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v2.5
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 443:443
+      - 1194:1194/udp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${ACME_STORAGE}:/letsencrypt
+      - ./entrypoint:/entrypoint
+      - ./traefik/config.yml:/etc/traefik/config.yml:ro
+    env_file: .env
+    networks:
+      backend:
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`traefik.${ROOT_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      - traefik.http.routers.dashboard.entrypoints=websecure
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.middlewares=auth
+      - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}
+    entrypoint: /entrypoint/ip_route_setup.sh
+    command:
+      - --log.level=INFO
+      # docker & dynamic configuration
+      - --providers.docker=true
+      - --providers.docker.network=backend
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.debugloggeneratedtemplate=true
+      - --providers.file.filename=/etc/traefik/config.yml
+      # traefik API and dashboard
+      - --api.dashboard=true
+      # DNS challenge
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=digitalocean
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      # entrypoints
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.certResolver=letsencrypt
+      - --entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.${ROOT_DOMAIN}
+
+  wireguard:
+    image: lscr.io/linuxserver/wireguard
+    restart: unless-stopped
+    networks:
+      backend:
+        ipv4_address: 172.28.241.3
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - SERVERURL=wireguard.${ROOT_DOMAIN}
+      - PEERS=pi,dm_iphone,ta_mac,dm_mac
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.15.0.0
+      - ALLOWEDIPS=0.0.0.0/0
+    ports:
+      - 51820:51820/udp
+    volumes:
+      - ./wireguard/config:/config
+      - /lib/modules:/lib/modules
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+
+  squid:
+    image: babim/squid
+    restart: unless-stopped
+    environment:
+      - AUTH=true
+      - USERNAME=${SQUID_USERNAME}
+      - PASSWORD=${SQUID_PASSWORD}
+    ports:
+      - 3128:3128
+
+networks:
+  backend:
+    external: true
