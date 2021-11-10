@@ -1,0 +1,14 @@
+draft: false
+acme:
+  email_account: kdp19991@gmail.com
+  staging: false
+profiles:
+- name: homelab_profile
+  provider: digitalocean
+  provider_options:
+    auth_token: change_me
+certificates:
+- domains:
+  - "*.hidemire.dev"
+  - hidemire.dev
+  profile: homelab_profile
