@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+  wireguard:
+    image: linuxserver/wireguard
+    restart: unless-stopped
+    volumes:
+      - "./wireguard/wg0.conf:/config/wg0.conf"
+      - "/lib/modules:/lib/modules:ro"
+    environment:
+      - PUID=1000
+      - PGID=1000
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+
+  haproxy:
+    image: haproxy
+    restart: unless-stopped
+    network_mode: service:wireguard
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - wireguard
