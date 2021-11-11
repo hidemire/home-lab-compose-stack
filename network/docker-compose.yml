@@ -67,7 +67,7 @@ services:
       - TZ=Europe/London
       - SERVERURL=wireguard.${ROOT_DOMAIN}
       - PEERS=pi,dm_iphone,ta_mac,dm_mac
-      - PEERDNS=auto
+      - PEERDNS=172.28.241.11
       - INTERNAL_SUBNET=10.15.0.0
       - ALLOWEDIPS=0.0.0.0/0
     ports:
