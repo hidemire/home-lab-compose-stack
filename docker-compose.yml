@@ -13,10 +13,16 @@ services:
       backend:
     labels:
       - traefik.enable=true
+      # Frontends
       - traefik.http.routers.portainer-frontend.rule=Host(`portainer.${ROOT_DOMAIN}`)
       - traefik.http.routers.portainer-frontend.entrypoints=websecure
       - traefik.http.services.portainer-frontend.loadbalancer.server.port=9000
       - traefik.http.routers.portainer-frontend.service=portainer-frontend
+      # Edge
+      - traefik.http.routers.portainer-edge.rule=Host(`portainer-edge.${ROOT_DOMAIN}`)
+      - traefik.http.routers.portainer-edge.entrypoints=websecure
+      - traefik.http.services.portainer-edge.loadbalancer.server.port=8000
+      - traefik.http.routers.portainer-edge.service=portainer-edge
 
 networks:
   backend:
