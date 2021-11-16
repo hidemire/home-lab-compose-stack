@@ -14,6 +14,16 @@ services:
       - traefik.http.routers.artifactory.entrypoints=websecure
       - traefik.http.routers.artifactory.service=artifactory
       - traefik.http.services.artifactory.loadbalancer.server.port=8081
+      # Docker Connector
+      - traefik.http.routers.docker-connector.rule=Host(`docker.${ROOT_DOMAIN}`)
+      - traefik.http.routers.docker-connector.entrypoints=websecure
+      - traefik.http.services.docker-connector.loadbalancer.server.port=5000
+      - traefik.http.routers.docker-connector.service=docker-connector
+      # Private Docker Connector
+      - traefik.http.routers.private-docker-connector.rule=Host(`docker-private.${ROOT_DOMAIN}`)
+      - traefik.http.routers.private-docker-connector.entrypoints=websecure
+      - traefik.http.services.private-docker-connector.loadbalancer.server.port=5001
+      - traefik.http.routers.private-docker-connector.service=private-docker-connector
 
 networks:
   backend:
