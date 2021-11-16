@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  nexus:
+    image: sonatype/nexus3
+    restart: unless-stopped
+    volumes:
+      - nexus-data:/nexus-data
+    networks:
+      backend: null
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.artifactory.rule=Host(`artifactory.${ROOT_DOMAIN}`)
+      - traefik.http.routers.artifactory.entrypoints=websecure
+      - traefik.http.routers.artifactory.service=artifactory
+      - traefik.http.services.artifactory.loadbalancer.server.port=8081
+
+networks:
+  backend:
+    external: true
+
+volumes:
+  nexus-data: null
