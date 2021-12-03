@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:
+  filebrowser:
+    image: filebrowser/filebrowser
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    volumes:
+      - ${FILEBROWSER_SRV}:/srv
+      - ${FILEBROWSER_DB_PATH}:/database.db
+    networks:
+      backend: null
+    security_opt:
+      - no-new-privileges:true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.filebrowser.rule=Host(`filebrowser.${ROOT_DOMAIN}`)
+      - traefik.http.routers.filebrowser.entrypoints=websecure
+      - traefik.http.routers.filebrowser.service=filebrowser
+      - traefik.http.services.filebrowser.loadbalancer.server.port=80
+
+networks:
+  backend:
+    external: true
