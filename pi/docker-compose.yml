@@ -24,3 +24,11 @@ services:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
     depends_on:
       - wireguard
+
+  rtmp-recorder:
+    image: nginx-rtmp
+    ports:
+      - 1935:1935
+    volumes:
+      - ./rtmp-recorder/nginx.conf:/etc/nginx/nginx.conf.template
+      - ${RTMP_RECORDS_FOLDER}:/opt/data/records/
