@@ -24,3 +24,12 @@ http:
         forceSTSHeader: true
         stsIncludeSubdomains: true
         stsPreload: true
+
+tls:
+  {{ if eq (env "REPLACE_DEFAULT_CERTIFICATE") "true" }}
+  stores:
+    default:
+      defaultCertificate:
+        certFile: {{env "DEFAULT_CERTIFICATE_CERT_FILE"}}
+        keyFile: {{env "DEFAULT_CERTIFICATE_KEY_FILE"}}
+  {{ end }}
