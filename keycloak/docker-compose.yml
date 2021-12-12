@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:14.0.0
+    networks:
+      backend: null
+    environment:
+      - KEYCLOAK_USER=${KEYCLOAK_USER}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD}
+      - PROXY_ADDRESS_FORWARDING=true
+    volumes:
+      - .keycloak/:/opt/jboss/keycloak/standalone/data/
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.keycloak.rule=Host(`keycloak.${ROOT_DOMAIN}`)
+      - traefik.http.routers.keycloak.entrypoints=websecure
+      - traefik.http.routers.keycloak.service=keycloak
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
+
+  forwardauth:
+    image: thomseddon/traefik-forward-auth:2
+    restart: unless-stopped
+    networks:
+      backend: null
+    depends_on:
+      - keycloak
+    environment:
+      - DEFAULT_PROVIDER=oidc
+      - PROVIDERS_OIDC_ISSUER_URL=${FORWARDAUTH_PROVIDERS_OIDC_ISSUER_URL}
+      - PROVIDERS_OIDC_CLIENT_ID=${FORWARDAUTH_PROVIDERS_OIDC_CLIENT_ID}
+      - PROVIDERS_OIDC_CLIENT_SECRET=${FORWARDAUTH_PROVIDERS_OIDC_CLIENT_SECRET}
+      - SECRET=${FORWARDAUTH_SECRET}
+      - INSECURE_COOKIE=false
+      - COOKIE_DOMAIN=${ROOT_DOMAIN}
+      - LIFETIME=10
+    labels:
+      - traefik.enable=true
+      # - traefik.http.routers.forwardauth.rule=PathPrefix(`/_oauth`)
+      # - traefik.http.routers.forwardauth.entrypoints=websecure
+      # - traefik.http.routers.forwardauth.service=forwardauth
+      # - traefik.http.services.forwardauth.loadbalancer.server.port=4181
+      - traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forwardauth:4181
+      - traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User
+
+networks:
+  backend:
+    external: true

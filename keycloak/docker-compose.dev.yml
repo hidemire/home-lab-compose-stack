@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+  keycloak:
+    ports:
+      - 8080:8080
+
+  forwardauth:
+    ports:
+      - 4181:4181

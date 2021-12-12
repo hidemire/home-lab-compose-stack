@@ -22,11 +22,10 @@ services:
       - host.docker.internal:host-gateway
     labels:
       - traefik.enable=true
-      - traefik.http.routers.dashboard.rule=Host(`traefik.${ROOT_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
+      - traefik.http.routers.dashboard.rule=Host(`traefik.${ROOT_DOMAIN}`)
       - traefik.http.routers.dashboard.entrypoints=websecure
       - traefik.http.routers.dashboard.service=api@internal
-      - traefik.http.routers.dashboard.middlewares=auth
-      - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}
+      - traefik.http.routers.dashboard.middlewares=traefik-forward-auth@docker
     entrypoint: /entrypoint/entrypoint.sh
     command:
       - --log.level=INFO
@@ -54,42 +53,42 @@ services:
       - --entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}
       - --entrypoints.websecure.http.tls.domains[0].sans=*.${ROOT_DOMAIN}
 
-  wireguard:
-    image: lscr.io/linuxserver/wireguard
-    restart: unless-stopped
-    networks:
-      backend:
-        ipv4_address: 172.28.241.100
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
-      - SERVERURL=wireguard.${ROOT_DOMAIN}
-      - PEERS=pi,dm_iphone,ta_mac,dm_mac
-      - PEERDNS=172.28.241.11
-      - INTERNAL_SUBNET=10.15.0.0
-      - ALLOWEDIPS=0.0.0.0/0
-    ports:
-      - 51820:51820/udp
-    volumes:
-      - ./wireguard/config:/config
-      - /lib/modules:/lib/modules
-    sysctls:
-      - net.ipv4.ip_forward=1
-      - net.ipv4.conf.all.src_valid_mark=1
+  # wireguard:
+  #   image: lscr.io/linuxserver/wireguard
+  #   restart: unless-stopped
+  #   networks:
+  #     backend:
+  #       ipv4_address: 172.28.241.100
+  #   cap_add:
+  #     - NET_ADMIN
+  #     - SYS_MODULE
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/London
+  #     - SERVERURL=wireguard.${ROOT_DOMAIN}
+  #     - PEERS=pi,dm_iphone,ta_mac,dm_mac
+  #     - PEERDNS=172.28.241.11
+  #     - INTERNAL_SUBNET=10.15.0.0
+  #     - ALLOWEDIPS=0.0.0.0/0
+  #   ports:
+  #     - 51820:51820/udp
+  #   volumes:
+  #     - ./wireguard/config:/config
+  #     - /lib/modules:/lib/modules
+  #   sysctls:
+  #     - net.ipv4.ip_forward=1
+  #     - net.ipv4.conf.all.src_valid_mark=1
 
-  squid:
-    image: babim/squid
-    restart: unless-stopped
-    environment:
-      - AUTH=true
-      - USERNAME=${SQUID_USERNAME}
-      - PASSWORD=${SQUID_PASSWORD}
-    ports:
-      - 3128:3128
+  # squid:
+  #   image: babim/squid
+  #   restart: unless-stopped
+  #   environment:
+  #     - AUTH=true
+  #     - USERNAME=${SQUID_USERNAME}
+  #     - PASSWORD=${SQUID_PASSWORD}
+  #   ports:
+  #     - 3128:3128
 
 networks:
   backend:
