@@ -5,7 +5,7 @@ services:
     image: sonatype/nexus3
     restart: unless-stopped
     volumes:
-      - nexus-data:/nexus-data
+      - ./nexus-data:/nexus-data
     networks:
       backend: null
     labels:
@@ -28,6 +28,3 @@ services:
 networks:
   backend:
     external: true
-
-volumes:
-  nexus-data: null
