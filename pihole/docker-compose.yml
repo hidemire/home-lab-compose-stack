@@ -19,6 +19,7 @@ services:
       DNS1: 172.28.241.10
       DNS2: 172.28.241.10
       WEBPASSWORD: ${PIHOLE_PASSWORD}
+      BLOCKING_ENABLED: "true"
     ports:
       - ${DNS_INTERFACE_IPV4}:53:53/tcp
       - ${DNS_INTERFACE_IPV4}:53:53/udp
