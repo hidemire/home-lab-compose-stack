@@ -1,0 +1,5 @@
+.env
+config/configuration.yml
+data/users_database.yml
+data/notification.txt
+data/db.sqlite3

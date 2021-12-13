@@ -25,8 +25,7 @@ services:
       - traefik.http.routers.dashboard.rule=Host(`traefik.${ROOT_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))
       - traefik.http.routers.dashboard.entrypoints=websecure
       - traefik.http.routers.dashboard.service=api@internal
-      - traefik.http.routers.dashboard.middlewares=auth
-      - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}
+      - traefik.http.routers.dashboard.middlewares=authelia@docker
     entrypoint: /entrypoint/entrypoint.sh
     command:
       - --log.level=INFO
