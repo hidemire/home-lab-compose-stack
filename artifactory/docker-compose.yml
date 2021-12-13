@@ -14,6 +14,7 @@ services:
       - traefik.http.routers.artifactory.entrypoints=websecure
       - traefik.http.routers.artifactory.service=artifactory
       - traefik.http.services.artifactory.loadbalancer.server.port=8081
+      - traefik.http.routers.artifactory.middlewares=authelia@docker
       # Docker Connector
       - traefik.http.routers.docker-connector.rule=Host(`docker.${ROOT_DOMAIN}`)
       - traefik.http.routers.docker-connector.entrypoints=websecure
