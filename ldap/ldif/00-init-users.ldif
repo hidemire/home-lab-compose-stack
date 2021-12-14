@@ -1,0 +1,13 @@
+version: 1
+
+dn: ou=users,{{ LDAP_BASE_DN }}
+objectclass: organizationalUnit
+objectclass: top
+ou: users
+
+dn: cn=hidemire,ou=users,{{ LDAP_BASE_DN }}
+cn: hidemire
+displayname: Hidemire
+objectclass: inetOrgPerson
+objectclass: top
+sn: Hidemire

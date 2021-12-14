@@ -34,16 +34,6 @@ authentication_backend:
   disable_reset_password: false
   refresh_interval: 30s
 
-  file:
-    path: /data/users_database.yml
-    password:
-      algorithm: argon2id
-      iterations: 1
-      key_length: 32
-      salt_length: 16
-      memory: 1024
-      parallelism: 8
-
 session:
   name: authelia_session
   same_site: lax

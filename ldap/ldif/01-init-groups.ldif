@@ -1,0 +1,12 @@
+version: 1
+
+dn: ou=groups,{{ LDAP_BASE_DN }}
+objectclass: organizationalUnit
+objectclass: top
+ou: groups
+
+dn: cn=admins,ou=groups,{{ LDAP_BASE_DN }}
+cn: admins
+member: cn=hidemire,ou=users,{{ LDAP_BASE_DN }}
+objectclass: groupOfNames
+objectclass: top

@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  openldap:
+    image: osixia/openldap
+    restart: unless-stopped
+    networks:
+      backend: null
+    volumes:
+      - ./database:/var/lib/ldap
+      - ./config:/etc/ldap/slapd.d
+      - ./ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    environment:
+      - LDAP_ORGANISATION=${LDAP_ORGANISATION}
+      - LDAP_DOMAIN=${LDAP_DOMAIN}
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
+      - LDAP_CONFIG_PASSWORD=${LDAP_CONFIG_PASSWORD}
+      - LDAP_BASE_DN=${LDAP_BASE_DN}
+    command: --copy-service
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    restart: unless-stopped
+    networks:
+      backend: null
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    depends_on:
+      - openldap
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.phpldapadmin.rule=Host(`ldap.${ROOT_DOMAIN}`)
+      - traefik.http.routers.phpldapadmin.entrypoints=websecure
+
+networks:
+  backend:
+    external: true
