@@ -53,9 +53,6 @@ storage:
 notifier:
   disable_startup_check: false
 
-  filesystem:
-    filename: /data/notification.txt
-
 access_control:
   default_policy: deny
 
