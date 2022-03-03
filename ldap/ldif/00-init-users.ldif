@@ -8,6 +8,7 @@ ou: users
 dn: cn=hidemire,ou=users,{{ LDAP_BASE_DN }}
 cn: hidemire
 displayname: Hidemire
+employeetype: cn=admins,ou=groups,dc=hidemire,dc=dev
 objectclass: inetOrgPerson
 objectclass: top
 sn: Hidemire

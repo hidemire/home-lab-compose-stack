@@ -16,6 +16,8 @@ services:
       - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD}
       - LDAP_CONFIG_PASSWORD=${LDAP_CONFIG_PASSWORD}
       - LDAP_BASE_DN=${LDAP_BASE_DN}
+    ports:
+      - 127.0.0.1:3389:389
     command: --copy-service
 
   phpldapadmin:
@@ -28,6 +30,8 @@ services:
       - PHPLDAPADMIN_HTTPS=false
     depends_on:
       - openldap
+    ports:
+      - 127.0.0.1:8080:80
     labels:
       - traefik.enable=true
       - traefik.http.routers.phpldapadmin.rule=Host(`ldap.${ROOT_DOMAIN}`)
