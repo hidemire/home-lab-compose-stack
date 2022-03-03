@@ -67,18 +67,63 @@ services:
       - PGID=1000
       - TZ=Europe/London
       - SERVERURL=wireguard.${ROOT_DOMAIN}
-      - PEERS=pi,dm_iphone,ta_mac,dm_mac
+      - PEERS=pi
       - PEERDNS=172.28.241.11
       - INTERNAL_SUBNET=10.15.0.0
       - ALLOWEDIPS=0.0.0.0/0
     ports:
       - 51820:51820/udp
     volumes:
-      - ./wireguard/config:/config
+      - ./wireguard:/config
       - /lib/modules:/lib/modules
     sysctls:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
+
+  wireguard-portal:
+    image: h44z/wg-portal:latest
+    restart: unless-stopped
+    network_mode: service:wireguard
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./wireguard:/etc/wireguard
+      - ./wireguard-portal:/app/data
+    environment:
+      # WireGuard Settings
+      - WG_DEVICES=wg0
+      - WG_DEFAULT_DEVICE=wg0
+      - WG_CONFIG_PATH=/etc/wireguard
+      # Core Settings
+      - EXTERNAL_URL=https://wireguard-portal.${ROOT_DOMAIN}
+      - WEBSITE_TITLE=WireGuard VPN
+      - COMPANY_NAME=Hidemire
+      - ADMIN_USER=${WG_PORTAL_ADMIN_USER}
+      - ADMIN_PASS=${WG_PORTAL_ADMIN_PASS}
+      # Mail Settings
+      - MAIL_FROM=${WG_PORTAL_MAIL_FROM}
+      - EMAIL_HOST=${WG_PORTAL_EMAIL_HOST}
+      - EMAIL_PORT=${WG_PORTAL_EMAIL_PORT}
+      - EMAIL_USERNAME=${WG_PORTAL_EMAIL_USERNAME}
+      - EMAIL_PASSWORD=${WG_PORTAL_EMAIL_PASSWORD}
+      # LDAP Settings
+      - CREATE_DEFAULT_PEER=true
+      - LDAP_ENABLED=true
+      - LDAP_STARTTLS=${WG_PORTAL_LDAP_STARTTLS}
+      - LDAP_URL=${WG_PORTAL_LDAP_URL}
+      - LDAP_BASEDN=${WG_PORTAL_LDAP_BASEDN}
+      - LDAP_USER=${WG_PORTAL_LDAP_USER}
+      - LDAP_PASSWORD=${WG_PORTAL_LDAP_PASSWORD}
+      - LDAP_ADMIN_GROUP=${WG_PORTAL_LDAP_ADMIN_GROUP}
+      - LDAP_ATTR_GROUPS=${WG_PORTAL_LDAP_ATTR_GROUPS}
+      - LDAP_LOGIN_FILTER=${WG_PORTAL_LDAP_LOGIN_FILTER}
+      - LDAP_SYNC_FILTER=${WG_PORTAL_LDAP_SYNC_FILTER}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wireguard-portal.rule=Host(`wireguard-portal.${ROOT_DOMAIN}`)
+      - traefik.http.routers.wireguard-portal.entrypoints=websecure
+      - traefik.http.routers.wireguard-portal.service=wireguard-portal
+      - traefik.http.services.wireguard-portal.loadbalancer.server.port=8123
 
   squid:
     image: babim/squid
