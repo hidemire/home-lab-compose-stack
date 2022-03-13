@@ -1,0 +1,116 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:14.2
+    command:
+      - postgres
+      - -c
+      - max_connections=50
+      - -c
+      - shared_buffers=1GB
+      - -c
+      - effective_cache_size=4GB
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=512MB
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - temp_file_limit=10GB
+      - -c
+      - log_min_duration_statement=200ms
+      - -c
+      - idle_in_transaction_session_timeout=10s
+      - -c
+      - lock_timeout=1s
+      - -c
+      - statement_timeout=60s
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.max=10000
+      - -c
+      - pg_stat_statements.track=all
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      backend:
+        ipv4_address: 172.28.241.100
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_CONFIG_AUTHENTICATION_SOURCES=['ldap', 'internal']
+      - PGADMIN_CONFIG_LDAP_AUTO_CREATE_USER=False
+      - PGADMIN_CONFIG_LDAP_SERVER_URI="ldap://openldap"
+      - PGADMIN_CONFIG_LDAP_SEARCH_BASE_DN="ou=users,dc=hidemire,dc=dev"
+      - PGADMIN_CONFIG_LDAP_USERNAME_ATTRIBUTE="cn"
+      - PGADMIN_CONFIG_LDAP_BIND_USER="${PGADMIN_CONFIG_LDAP_BIND_USER}"
+      - PGADMIN_CONFIG_LDAP_BIND_PASSWORD="${PGADMIN_CONFIG_LDAP_BIND_PASSWORD}"
+      - PGADMIN_CONFIG_LDAP_CONNECTION_TIMEOUT=30
+      - PGADMIN_CONFIG_LDAP_SEARCH_FILTER="(objectClass=inetOrgPerson)"
+      - PGADMIN_CONFIG_LDAP_USE_STARTTLS=False
+      - PGADMIN_CONFIG_SERVER_MODE=True
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+    restart: unless-stopped
+    networks:
+      backend:
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wireguard-portal.rule=Host(`pgadmin.${ROOT_DOMAIN}`)
+      - traefik.http.routers.pgadmin.entrypoints=websecure
+      - traefik.http.routers.pgadmin.service=pgadmin
+      - traefik.http.services.pgadmin.loadbalancer.server.port=80
+      - traefik.http.routers.pgadmin.middlewares=authelia@docker
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    environment:
+      - DATA_SOURCE_URI=postgres:5432/?sslmode=disable
+      - DATA_SOURCE_USER=postgres
+      - DATA_SOURCE_PASS=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      backend:
+
+  postgres-backup:
+    image: hidemire/postgresql-backup-s3:latest
+    environment:
+      - POSTGRES_DATABASE=all
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - S3_ACCESS_KEY_ID=${S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
+      - S3_BUCKET=${S3_BUCKET}
+      - S3_REGION=${S3_REGION}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_PREFIX=${S3_PREFIX:-backup}
+      - SCHEDULE=@every 6h
+      - DELETE_OLDER_THAN=7 days ago
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      backend:
+
+networks:
+  backend:
+    external: true
