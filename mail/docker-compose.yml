@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  mailserver:
+    image: docker.io/mailserver/docker-mailserver:latest
+    container_name: mailserver
+    hostname: mail
+    domainname: ${ROOT_DOMAIN}
+    labels:
+      - mailserver-traefik.renew.domain=${ROOT_DOMAIN}
+      - traefik.enable=true
+      - traefik.http.routers.mail.rule=Host(`mail.${ROOT_DOMAIN}`)
+      - traefik.http.routers.mail.entrypoints=websecure
+      - traefik.http.routers.mail.middlewares=redirect-webmail@docker
+      - traefik.http.middlewares.redirect-webmail.redirectregex.regex=.*
+      - traefik.http.middlewares.redirect-webmail.redirectregex.replacement=https://google.com/
+    ports:
+      - 25:25    # SMTP  (explicit TLS => STARTTLS)
+      - 143:143  # IMAP4 (explicit TLS => STARTTLS)
+      - 465:465  # ESMTP (implicit TLS)
+      - 587:587  # ESMTP (explicit TLS => STARTTLS)
+      - 993:993  # IMAP4 (implicit TLS)
+    volumes:
+      - ./mail-data/dms/mail-data/:/var/mail/
+      - ./mail-data/dms/mail-state/:/var/mail-state/
+      - ./mail-data/dms/mail-logs/:/var/log/mail/
+      - ./mail-data/dms/config/:/tmp/docker-mailserver/
+      - /etc/localtime:/etc/localtime:ro
+      - ${ACME_STORAGE}/acme.json:/etc/letsencrypt/acme.json:ro
+    restart: unless-stopped
+    stop_grace_period: 1m
+    networks:
+      backend: null
+    cap_add:
+      - NET_ADMIN
+      - SYS_PTRACE
+    environment:
+      - SSL_TYPE=letsencrypt
+      - SSL_DOMAIN=${ROOT_DOMAIN}
+
+networks:
+  backend:
+    external: true
