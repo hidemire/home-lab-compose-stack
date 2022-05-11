@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./nexus-data:/nexus-data
+      - ./system.properties:/opt/sonatype/nexus/etc/karaf/system.properties
     networks:
       backend: null
     labels:
