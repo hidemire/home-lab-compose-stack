@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+  filestash:
+    image: machines/filestash
+    restart: unless-stopped
+    volumes:
+      - ./filestash-data:/app/data/state
+    networks:
+      backend: null
+    environment:
+      - APPLICATION_URL=filestash.${ROOT_DOMAIN}
+      - ONLYOFFICE_URL=http://onlyoffice
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.filestash.rule=Host(`filestash.${ROOT_DOMAIN}`)
+      - traefik.http.routers.filestash.entrypoints=websecure
+      - traefik.http.routers.filestash.service=filestash
+      - traefik.http.services.filestash.loadbalancer.server.port=8334
+      - traefik.http.routers.filestash.middlewares=authelia@docker
+
+  onlyoffice:
+    image: onlyoffice/documentserver
+    restart: unless-stopped
+
+networks:
+  backend:
+    external: true
