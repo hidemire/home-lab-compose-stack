@@ -47,7 +47,6 @@ services:
     restart: unless-stopped
     networks:
       backend:
-        ipv4_address: 172.28.241.100
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -72,7 +71,7 @@ services:
       backend:
     labels:
       - traefik.enable=true
-      - traefik.http.routers.wireguard-portal.rule=Host(`pgadmin.${ROOT_DOMAIN}`)
+      - traefik.http.routers.pgadmin.rule=Host(`pgadmin.${ROOT_DOMAIN}`)
       - traefik.http.routers.pgadmin.entrypoints=websecure
       - traefik.http.routers.pgadmin.service=pgadmin
       - traefik.http.services.pgadmin.loadbalancer.server.port=80

@@ -47,6 +47,7 @@ services:
 
   whoami:
     image: traefik/whoami
+    restart: unless-stopped
     networks:
       backend: null
     labels:
