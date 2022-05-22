@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+  redis:
+    image: bitnami/redis:6.2
+    restart: unless-stopped
+    networks:
+      backend: null
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - ./redis-data:/bitnami/redis/data
+
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    restart: unless-stopped
+    networks:
+      backend: null
+    environment:
+      - REDIS_HOST=redis
+      # - REDIS_HOSTS=label:redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.redis-commander.rule=Host(`redis-commander.${ROOT_DOMAIN}`)
+      - traefik.http.routers.redis-commander.entrypoints=websecure
+      - traefik.http.routers.redis-commander.service=redis-commander
+      - traefik.http.services.redis-commander.loadbalancer.server.port=8081
+      - traefik.http.routers.redis-commander.middlewares=authelia@docker
+    depends_on:
+      - redis
+
+  bullboard:
+    image: deadly0/bull-board
+    restart: unless-stopped
+    networks:
+      backend: null
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bullboard.rule=Host(`bullboard.${ROOT_DOMAIN}`)
+      - traefik.http.routers.bullboard.entrypoints=websecure
+      - traefik.http.routers.bullboard.service=bullboard
+      - traefik.http.services.bullboard.loadbalancer.server.port=3000
+      - traefik.http.routers.bullboard.middlewares=authelia@docker
+    depends_on:
+      - redis
+
+networks:
+  backend:
+    external: true
