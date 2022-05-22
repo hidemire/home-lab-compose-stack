@@ -10,6 +10,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - ./redis-data:/bitnami/redis/data
+    command: /opt/bitnami/scripts/redis/run.sh --notify-keyspace-events KEA
 
   redis-commander:
     image: ghcr.io/joeferner/redis-commander:latest
