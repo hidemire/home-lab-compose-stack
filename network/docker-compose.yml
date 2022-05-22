@@ -35,6 +35,10 @@ services:
       - --providers.docker.exposedbydefault=false
       - --providers.file.debugloggeneratedtemplate=true
       - --providers.file.filename=/etc/traefik/config.yml
+      - --providers.redis.endpoints=${REDIS_ENDPOINT}
+      - --providers.redis.rootkey=traefik
+      - --providers.redis.username=${REDIS_USERNAME}
+      - --providers.redis.password=${REDIS_PASSWORD}
       # traefik API and dashboard
       - --api.dashboard=true
       # DNS challenge
