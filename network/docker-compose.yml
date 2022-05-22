@@ -129,8 +129,6 @@ services:
       - traefik.http.routers.wireguard-portal.service=wireguard-portal
       - traefik.http.services.wireguard-portal.loadbalancer.server.port=8123
       - traefik.http.routers.wireguard-portal.middlewares=authelia@docker
-    networks:
-      backend:
 
   squid:
     image: babim/squid
