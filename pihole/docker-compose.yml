@@ -21,8 +21,8 @@ services:
       WEBPASSWORD: ${PIHOLE_PASSWORD}
       BLOCKING_ENABLED: "true"
     ports:
-      - ${DNS_INTERFACE_IPV4}:53:53/tcp
-      - ${DNS_INTERFACE_IPV4}:53:53/udp
+      - '${DNS_INTERFACE_IPV4}:53:53/tcp'
+      - '${DNS_INTERFACE_IPV4}:53:53/udp'
     volumes:
       - ./etc-pihole/:/etc/pihole/
       - ./etc-dnsmasq.d/:/etc/dnsmasq.d/

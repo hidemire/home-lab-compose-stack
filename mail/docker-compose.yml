@@ -15,11 +15,11 @@ services:
       - traefik.http.middlewares.redirect-webmail.redirectregex.regex=.*
       - traefik.http.middlewares.redirect-webmail.redirectregex.replacement=https://google.com/
     ports:
-      - 25:25    # SMTP  (explicit TLS => STARTTLS)
-      - 143:143  # IMAP4 (explicit TLS => STARTTLS)
-      - 465:465  # ESMTP (implicit TLS)
-      - 587:587  # ESMTP (explicit TLS => STARTTLS)
-      - 993:993  # IMAP4 (implicit TLS)
+      - '25:25'    # SMTP  (explicit TLS => STARTTLS)
+      - '143:143'  # IMAP4 (explicit TLS => STARTTLS)
+      - '465:465'  # ESMTP (implicit TLS)
+      - '587:587'  # ESMTP (explicit TLS => STARTTLS)
+      - '993:993'  # IMAP4 (implicit TLS)
     volumes:
       - ./mail-data/dms/mail-data/:/var/mail/
       - ./mail-data/dms/mail-state/:/var/mail-state/

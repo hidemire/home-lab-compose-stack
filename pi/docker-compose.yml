@@ -29,7 +29,7 @@ services:
     image: nginx-rtmp
     restart: unless-stopped
     ports:
-      - 1935:1935
+      - '1935:1935'
     volumes:
       - ./rtmp-recorder/nginx.conf:/etc/nginx/nginx.conf.template
       - ${RTMP_RECORDS_FOLDER}:/opt/data/records/
