@@ -27,6 +27,26 @@ services:
     depends_on:
       - crowdsec
 
+  dashboard:
+    build: ./dashboard
+    restart: unless-stopped
+    networks:
+      backend: null
+    environment:
+      MB_DB_FILE: /data/metabase.db
+      MGID: "${GID-1000}"
+    volumes:
+      - crowdsec-db:/metabase-data/
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.crowdsec-dashboard.rule=Host(`crowdsec.${ROOT_DOMAIN}`)
+      - traefik.http.routers.crowdsec-dashboard.entrypoints=websecure
+      - traefik.http.routers.crowdsec-dashboard.service=crowdsec-dashboard
+      - traefik.http.services.crowdsec-dashboard.loadbalancer.server.port=3000
+      - traefik.http.routers.crowdsec-dashboard.middlewares=authelia@docker
+    depends_on:
+      - crowdsec
+
 networks:
   backend:
     external: true
