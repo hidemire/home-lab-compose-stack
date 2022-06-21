@@ -15,6 +15,7 @@ services:
       - ./entrypoint:/entrypoint
       - ./certs:/tools/certs
       - ./traefik/config.yml:/etc/traefik/config.yml:ro
+      - traefik-logs:/var/log/traefik
     env_file: .env
     networks:
       backend:
@@ -29,6 +30,8 @@ services:
     entrypoint: /entrypoint/entrypoint.sh
     command:
       - --log.level=INFO
+      - --log.filePath=/var/log/traefik/traefik.log
+      - --accessLog.filePath=/var/log/traefik/access.log
       # docker & dynamic configuration
       - --providers.docker=true
       - --providers.docker.network=backend
@@ -56,6 +59,7 @@ services:
       - --entrypoints.websecure.http.tls.certResolver=letsencrypt
       - --entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}
       - --entrypoints.websecure.http.tls.domains[0].sans=*.${ROOT_DOMAIN}
+      - --entrypoints.websecure.http.middlewares=crowdsec-bouncer@file
 
   wireguard:
     image: lscr.io/linuxserver/wireguard
@@ -143,3 +147,6 @@ services:
 networks:
   backend:
     external: true
+
+volumes:
+  traefik-logs:

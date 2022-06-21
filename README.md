@@ -37,3 +37,14 @@ DNS Servers
 ```text
 172.28.241.11
 ```
+
+Crowdsec
+
+```bash
+docker-compose exec crowdsec cscli hub update
+docker-compose exec crowdsec cscli hub upgrade
+
+docker-compose exec crowdsec cscli bouncers add bouncer-traefik
+docker-compose exec crowdsec cscli decisions add --ip 192.168.0.101
+docker-compose exec crowdsec cscli decisions delete --ip 192.168.0.101
+```
