@@ -5,7 +5,8 @@ services:
     image: crowdsecurity/crowdsec:latest
     restart: unless-stopped
     networks:
-      backend: null
+      backend:
+        ipv4_address: 172.28.241.110
     environment:
       GID: "${GID-1000}"
       COLLECTIONS: "crowdsecurity/linux crowdsecurity/http-cve crowdsecurity/traefik"

@@ -40,11 +40,24 @@ DNS Servers
 
 Crowdsec
 
+Add host firewall <https://doc.crowdsec.net/docs/bouncers/firewall/>
+
+```text
+api_url: http://172.28.241.110:8080/
+api_key:
+disable_ipv6: true
+iptables_chains:
+  - INPUT
+#  - FORWARD
+  - DOCKER-USER
+```
+
 ```bash
 docker-compose exec crowdsec cscli hub update
 docker-compose exec crowdsec cscli hub upgrade
 
 docker-compose exec crowdsec cscli bouncers add bouncer-traefik
+docker-compose exec crowdsec cscli bouncers add bouncer-firewall
 docker-compose exec crowdsec cscli decisions add --ip 192.168.0.101
 docker-compose exec crowdsec cscli decisions delete --ip 192.168.0.101
 ```
