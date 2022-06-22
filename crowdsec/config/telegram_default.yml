@@ -1,0 +1,23 @@
+type: http
+name: telegram
+
+log_level: info
+
+format: |
+  {
+   "chat_id": "-XXXXXXXXX",
+   "text": "
+     {{range . -}}
+     {{$alert := . -}}
+     {{range .Decisions -}}
+     {{.Value}} will get {{.Type}} for next {{.Duration}} for  triggering {{.Scenario}}.\r\n https://www.shodan.io/host/{{.Value}}
+     {{end -}}
+     {{end -}}
+   "
+  }
+
+url: https://api.telegram.org/bot<TELEGRAM_APY_KEY>/sendMessage # Replace <TELEGRAM_APY_KEY> with your APi key
+
+method: POST
+headers:
+  Content-Type: "application/json"
