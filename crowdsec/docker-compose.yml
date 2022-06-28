@@ -14,6 +14,7 @@ services:
       - ./config/acquis.yaml:/etc/crowdsec/acquis.yaml
       - ./config/profiles.yaml:/etc/crowdsec/profiles.yaml
       - ./config/notifications:/etc/crowdsec/notifications
+      - ./config/mywhitelists.yaml:/etc/crowdsec/parsers/s02-enrich/mywhitelists.yaml
       - crowdsec-db:/var/lib/crowdsec/data/
       - crowdsec-config:/etc/crowdsec/
       - network_traefik-logs:/var/log/traefik/:ro
